@@ -3,7 +3,6 @@ package main
 import (
 	"fmt"
 	"log"
-	"math/rand"
 	"os"
 	"sort"
 	"time"
@@ -18,8 +17,6 @@ var GitCommit string
 var BuildTime string
 
 func main() {
-	rand.Seed(time.Now().UTC().UnixNano())
-
 	compiledAt, err := time.Parse(time.RFC822Z, BuildTime)
 	if err != nil {
 		compiledAt = time.Now()
