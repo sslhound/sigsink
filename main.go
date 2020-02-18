@@ -39,17 +39,41 @@ func main() {
 	app.Copyright = "(c) 2020 SSL Hound, LLC"
 
 	app.Flags = []cli.Flag{
-		&cli.StringFlag{Name: "listen", Usage: "Configure the server to listen to this interface.", EnvVars: []string{"LISTEN",}, Value: "0.0.0.0:7000",},
-		&cli.StringFlag{Name: "domain", Usage: "Set the website domain.", Value: "sigsink.sslhound.com", EnvVars: []string{"DOMAIN",},},
-		&cli.StringFlag{Name: "environment", Usage: "Set the environment the application is running in.", EnvVars: []string{"ENVIRONMENT",}, Value: "development",},
-		&cli.BoolFlag{Name: "enable-keyfetch", Usage: "Enable fetching remote keys", EnvVars: []string{"ENABLE_KEYFETCH"}, Value: false,},
-		&cli.StringSliceFlag{Name: "key-source", Usage: "A location to load keys from", EnvVars: []string{"KEY_SOURCE",}, Value: cli.NewStringSlice("./keys"),},
+		&cli.StringFlag{
+			Name:    "listen",
+			Usage:   "Configure the server to listen to this interface.",
+			EnvVars: []string{"LISTEN"},
+			Value:   "0.0.0.0:7000",
+		},
+		&cli.StringFlag{
+			Name:    "domain",
+			Usage:   "Set the website domain.",
+			Value:   "sigsink.sslhound.com",
+			EnvVars: []string{"DOMAIN"},
+		},
+		&cli.StringFlag{
+			Name:    "environment",
+			Usage:   "Set the environment the application is running in.",
+			EnvVars: []string{"ENVIRONMENT"},
+			Value:   "development",
+		},
+		&cli.BoolFlag{
+			Name:    "enable-keyfetch",
+			Usage:   "Enable fetching remote keys",
+			EnvVars: []string{"ENABLE_KEYFETCH"},
+			Value:   false,
+		},
+		&cli.StringSliceFlag{
+			Name:    "key-source",
+			Usage:   "A location to load keys from",
+			EnvVars: []string{"KEY_SOURCE"},
+			Value:   cli.NewStringSlice("./keys"),
+		},
 	}
 
 	app.Action = server.Action
 
 	sort.Sort(cli.FlagsByName(app.Flags))
-	sort.Sort(cli.CommandsByName(app.Commands))
 
 	err = app.Run(os.Args)
 	if err != nil {

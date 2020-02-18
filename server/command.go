@@ -71,7 +71,7 @@ func Action(cliCtx *cli.Context) error {
 		defer httpCancelCtxCancel()
 		logger.Info("stopping http service")
 		if err = srv.Shutdown(httpCancelCtx); err != nil {
-			logger.Error("error shutting http service down", zap.Error(err))
+			logger.Error("error stopping http service", zap.Error(err))
 		}
 	})
 

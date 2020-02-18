@@ -32,7 +32,7 @@ RUN --mount=type=cache,target=/root/.cache/go-build \
         github.com/sslhound/sigsink/...
 
 FROM alpine:3.11 as sigsink
-RUN apk add --no-cache --update ca-certificates tzdata
+RUN apk add --no-cache --update ca-certificates
 RUN mkdir -p /sigsink
 WORKDIR /sigsink
 COPY --from=slim-build /go/bin/sigsink /go/bin/
