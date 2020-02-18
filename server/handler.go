@@ -5,7 +5,6 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/gin-gonic/gin"
 	"github.com/yukimochi/httpsig"
 )
 
@@ -13,28 +12,29 @@ type handler struct {
 	keyCache *keyCache
 }
 
-func (h handler) verifySignatureHandler(c *gin.Context) {
-	if c.Request.Method != "POST" {
-		c.AbortWithStatus(http.StatusMethodNotAllowed)
+func (h handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+	if r.Method == "GET" && r.URL.Path == "/" {
+		fmt.Fprint(w, "OK")
+		return
+	}
+
+	if r.Method != "POST" {
+		http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
 		return
 	}
 
 	var algo = httpsig.RSA_SHA256
-	if xalgo := c.GetHeader("X-ALGO"); len(xalgo) > 0 {
+	if xalgo := r.Header.Get("X-ALGO"); len(xalgo) > 0 {
 		algo = httpsig.Algorithm(xalgo)
 	}
 	if !strings.HasPrefix(string(algo), "rsa") {
-		c.AbortWithStatusJSON(http.StatusInternalServerError, map[string]string{
-			"error": fmt.Sprintf("http signature algorithm not supported: %s", algo),
-		})
+		http.Error(w, fmt.Sprintf("http signature algorithm not supported: %s", algo), http.StatusInternalServerError)
 		return
 	}
 
-	verifier, err := httpsig.NewVerifier(c.Request)
+	verifier, err := httpsig.NewVerifier(r)
 	if err != nil {
-		c.AbortWithStatusJSON(http.StatusInternalServerError, map[string]string{
-			"error": err.Error(),
-		})
+		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 	pubKeyId := verifier.KeyId()
@@ -43,26 +43,22 @@ func (h handler) verifySignatureHandler(c *gin.Context) {
 	if !knownKey {
 		err = h.keyCache.fetchRemote(pubKeyId)
 		if err != nil {
-			c.AbortWithStatusJSON(http.StatusInternalServerError, map[string]string{
-				"error": err.Error(),
-			})
+			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
 		}
 	}
 	publicKey, err := h.keyCache.get(pubKeyId)
 	if err != nil {
-		c.AbortWithStatusJSON(http.StatusInternalServerError, map[string]string{
-			"error": err.Error(),
-		})
+		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
 	if err = verifier.Verify(publicKey, algo); err != nil {
-		c.AbortWithStatusJSON(http.StatusInternalServerError, map[string]string{
-			"error": err.Error(),
-		})
+		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
-	c.Status(http.StatusNoContent)
+	fmt.Println("signed request verified with", pubKeyId)
+
+	w.WriteHeader(http.StatusNoContent)
 }

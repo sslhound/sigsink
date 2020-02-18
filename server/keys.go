@@ -12,15 +12,12 @@ import (
 	"strings"
 	"sync"
 	"time"
-
-	"go.uber.org/zap"
 )
 
 type keyCache struct {
 	keys              map[string]*rsa.PublicKey
 	lock              sync.Mutex
 	enableFetchRemote bool
-	logger            *zap.Logger
 }
 
 func (c *keyCache) addDirectory(directory string) error {
@@ -54,7 +51,7 @@ func (c *keyCache) addDirectory(directory string) error {
 			keyID, ok := block.Headers["key_id"]
 			if ok {
 				c.keys[keyID] = rsaPublicKey
-				c.logger.Info("added key", zap.String("key_id", keyID), zap.String("source", directory), zap.String("path", path))
+				fmt.Println("Added key", keyID, "from", path)
 			}
 
 		}
@@ -103,7 +100,8 @@ func (c *keyCache) fetchRemote(location string) error {
 	}
 
 	c.keys[location] = rsaPublicKey
-	c.logger.Info("added key", zap.String("key_id", location))
+
+	fmt.Println("Added key", location)
 
 	return nil
 }
