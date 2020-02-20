@@ -6,6 +6,7 @@ import (
 	"encoding/pem"
 	"fmt"
 	"io/ioutil"
+	"log"
 	"net/http"
 	"os"
 	"path/filepath"
@@ -51,7 +52,7 @@ func (c *keyCache) addDirectory(directory string) error {
 			keyID, ok := block.Headers["key_id"]
 			if ok {
 				c.keys[keyID] = rsaPublicKey
-				fmt.Println("Added key", keyID, "from", path)
+				log.Println("Added key", keyID, "from", path)
 			}
 
 		}
@@ -101,7 +102,7 @@ func (c *keyCache) fetchRemote(location string) error {
 
 	c.keys[location] = rsaPublicKey
 
-	fmt.Println("Added key", location)
+	log.Println("Added key", location)
 
 	return nil
 }

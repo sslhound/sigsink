@@ -3,7 +3,7 @@ package server
 import (
 	"context"
 	"crypto/rsa"
-	"fmt"
+	"log"
 	"net/http"
 	"os"
 	"os/signal"
@@ -44,25 +44,25 @@ func Action(cliCtx *cli.Context) error {
 	}
 
 	group.Add(func() error {
-		fmt.Println("starting http service", srv.Addr)
+		log.Println("starting http service", srv.Addr)
 		return srv.ListenAndServe()
 	}, func(error) {
 		httpCancelCtx, httpCancelCtxCancel := context.WithTimeout(context.Background(), 30*time.Second)
 		defer httpCancelCtxCancel()
-		fmt.Println("stopping http service")
+		log.Println("stopping http service")
 		if err := srv.Shutdown(httpCancelCtx); err != nil {
-			fmt.Println("error stopping http service:", err.Error())
+			log.Println("error stopping http service:", err.Error())
 		}
 	})
 
 	quit := make(chan os.Signal)
 	signal.Notify(quit, os.Interrupt)
 	group.Add(func() error {
-		fmt.Println("starting signal listener")
+		log.Println("starting signal listener")
 		<-quit
 		return nil
 	}, func(error) {
-		fmt.Println("stopping signal listener")
+		log.Println("stopping signal listener")
 		close(quit)
 	})
 
