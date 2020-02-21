@@ -1,6 +1,6 @@
 # sigsink
 
-A http signature validation server.
+A http signature validation server. Use it to test webhooks and services that implement HTTP signatures.
 
 # Usage
 
